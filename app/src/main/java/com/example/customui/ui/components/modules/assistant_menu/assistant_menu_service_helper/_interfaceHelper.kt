@@ -1,4 +1,4 @@
-package com.example.customui.ui.components.modules.assistant_menu_service_helper
+package com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

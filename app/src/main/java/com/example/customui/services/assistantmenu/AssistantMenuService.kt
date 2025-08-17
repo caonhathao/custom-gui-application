@@ -1,6 +1,5 @@
 package com.example.customui.services.assistantmenu
 
-import android.accessibilityservice.AccessibilityService
 import android.net.Uri
 import android.provider.Settings
 import android.app.Notification
@@ -36,10 +35,10 @@ import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.customui.R
-import com.example.customui.ui.components.modules.AssistantMenuModule
-import com.example.customui.ui.components.modules.assistant_menu_service_helper.DirectBackFeature
-import com.example.customui.ui.components.modules.assistant_menu_service_helper.FlashlightFeature
-import com.example.customui.ui.components.modules.assistant_menu_service_helper.WifiFeature
+import com.example.customui.ui.components.modules.assistant_menu.AssistantMenuModule
+import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.DirectBackFeature
+import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.FlashlightFeature
+import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.WifiFeature
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -128,7 +127,7 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                     listOf(
                         WifiFeature(this@AssistantMenuService),
                         FlashlightFeature(this@AssistantMenuService),
-                        DirectBackFeature()
+                        DirectBackFeature(onCloseMenu = { toggleMenuCloseState() })
                     )
                 )
 
@@ -173,6 +172,17 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
 
         setupTouchListener() // Để xử lý kéo thả
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+    }
+
+    companion object {
+        var instance: AssistantMenuService? = null
+        var isMenuExpanded: Boolean = false
+    }
+
+    fun closeMenuFromAccessibility() {
+        if (isMenuExpanded) {
+            toggleMenuCloseState()
+        }
     }
 
     private fun makeForeground() {
@@ -303,6 +313,7 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
 
     private fun toggleMenuOpenState() {
         isMenuExpanded = true
+        Companion.isMenuExpanded = true
 
         params.width =
             WindowManager.LayoutParams.MATCH_PARENT // Khi mở rộng, chiếm toàn bộ chiều rộng
@@ -310,8 +321,10 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
             WindowManager.LayoutParams.MATCH_PARENT // Khi mở rộng, chiếm toàn bộ chiều cao
 
         // Remove flags that prevent interaction
-        params.flags = (params.flags and WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE.inv())
-//        params.flags = (params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL.inv())
+        params.flags =
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
 
         windowManager.updateViewLayout(floatingView, params)
     }
@@ -319,12 +332,16 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
     private fun toggleMenuCloseState() {
         //Log.d("AssistantMenu", "📍 Closing menu")
         isMenuExpanded = false
+        Companion.isMenuExpanded = false
 
         params.width = WindowManager.LayoutParams.WRAP_CONTENT // Kích thước của icon thu nhỏ
         params.height = WindowManager.LayoutParams.WRAP_CONTENT
+
         // Add back flags for collapsed state - allows touch-through except on the button
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+        params.flags =
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
 
         windowManager.updateViewLayout(floatingView, params)
     }
