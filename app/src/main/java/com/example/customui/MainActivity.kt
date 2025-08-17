@@ -27,6 +27,7 @@ import android.view.accessibility.AccessibilityManager
 import android.widget.Toast // For showing messages to the user
 import com.example.customui.services.assistantmenu.AssistantMenuService // **Import your Service**
 import com.example.customui.ui.classes.Accessibility
+import com.example.customui.utils.NavigationUtils
 
 fun isAccessibilityServiceEnabled(context: Context, serviceClass: Class<out AccessibilityService>): Boolean {
     val am = context.getSystemService(AccessibilityManager::class.java) ?: return false
@@ -72,6 +73,20 @@ class MainActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+// Trong MainActivity.kt, thêm button này vào Column
+                    Button(onClick = {
+                        val service = Accessibility.instance
+                        if (service != null) {
+                            service.testNavigationActions()
+                            Log.d("MainActivity", NavigationUtils.getNavigationInfo(this@MainActivity))
+                        } else {
+                            Log.e("MainActivity", "Accessibility service not available")
+                            Toast.makeText(this@MainActivity, "Accessibility service not connected", Toast.LENGTH_SHORT).show()
+                        }
+                    }) {
+                        Text("Test Navigation Actions")
+                    }
+
                     Button(onClick = {
                         checkAndRequestOverlayAndAccessibility()
                     }) {

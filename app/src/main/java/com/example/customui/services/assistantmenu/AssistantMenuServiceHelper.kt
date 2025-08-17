@@ -1,7 +1,7 @@
 package com.example.customui.services.assistantmenu
 
 
-import com.example.customui.ui.components.modules.assistant_menu_service_helper._interfaceHelper
+import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper._interfaceHelper
 
 class AssistantMenuServiceHelper(private val features: List<_interfaceHelper>) {
     fun toggleFeature(name: String, enable: Boolean) {
