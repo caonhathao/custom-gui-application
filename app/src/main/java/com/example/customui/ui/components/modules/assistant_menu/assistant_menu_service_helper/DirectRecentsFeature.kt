@@ -32,7 +32,7 @@ class DirectRecentsFeature : _interfaceHelper {
                 val startX = width / 2f
                 val startY = height - 10f
                 val midX = width / 2f
-                val midY = height * 0.5f // Dừng ở giữa màn hình
+                val midY = height * 0.2f // Dừng ở giữa màn hình
 
                 val path = Path().apply {
                     moveTo(startX, startY)
