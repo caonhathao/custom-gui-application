@@ -17,6 +17,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
@@ -37,6 +38,8 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.customui.R
 import com.example.customui.ui.components.modules.assistant_menu.AssistantMenuModule
 import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.DirectBackFeature
+import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.DirectHomeFeature
+import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.DirectRecentsFeature
 import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.FlashlightFeature
 import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.WifiFeature
 import kotlinx.coroutines.CoroutineScope
@@ -45,15 +48,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-
 class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
     SavedStateRegistryOwner {
 
     private lateinit var windowManager: WindowManager
     private var floatingView: View? = null
 
-    private var menuOffsetState: AssistantMenuPosition =
-        AssistantMenuPosition(IntOffset(100, 100))
+    private var menuOffsetState = mutableStateOf(IntOffset(100, 100))
 
     private lateinit var composeView: ComposeView
     private lateinit var params: WindowManager.LayoutParams
@@ -127,13 +128,15 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                     listOf(
                         WifiFeature(this@AssistantMenuService),
                         FlashlightFeature(this@AssistantMenuService),
-                        DirectBackFeature(onCloseMenu = { toggleMenuCloseState() })
+                        DirectBackFeature(onCloseMenu = { toggleMenuCloseState() }),
+                        DirectHomeFeature(),
+                        DirectRecentsFeature()
                     )
                 )
 
                 AssistantMenuModule(
                     isExpanded = isMenuExpanded,
-                    menuOffset = menuOffsetState.getMenuOffset(),
+                    menuOffset = menuOffsetState.value,
                     onToggleExpand = { toggleMenuOpenState() },
                     onToggleClose = { toggleMenuCloseState() },
                     onCloseMenu = { stopSelf() }, // Ví dụ: đóng service
@@ -161,11 +164,9 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
         )
 
         params.gravity = Gravity.TOP or Gravity.START
-//        params.x = 0
-//        params.y = 100 // Vị trí ban đầu
 
-        params.x = menuOffsetState.getMenuOffset().x
-        params.y = menuOffsetState.getMenuOffset().y
+        params.x = menuOffsetState.value.x
+        params.y = menuOffsetState.value.y
 
         windowManager.addView(floatingView, params)
         makeForeground() // Chạy service ở foreground
@@ -238,6 +239,21 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                     return false // Let Compose handle touch events when expanded
                 }
 
+                // Xử lý chạm bên ngoài khi menu thu gọn
+                if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                    // Người dùng đã chạm bên ngoài view
+                    // Bạn có thể thực hiện hành động ở đây, ví dụ: đóng menu nếu nó đang mở
+                    // hoặc không làm gì cả nếu bạn chỉ muốn theo dõi
+                    Log.d("AssistantMenuService", "Touch outside menu detected")
+                    // Quan trọng: Nếu bạn muốn menu đóng lại khi chạm ra ngoài
+                    // và menu đang không mở rộng (ví dụ, một icon nhỏ),
+                    // bạn có thể không cần làm gì ở đây, vì FLAG_WATCH_OUTSIDE_TOUCH
+                    // chủ yếu dùng khi view lớn hơn và bạn muốn biết khi nào chạm ra ngoài nó.
+                    // Nếu bạn muốn đóng menu khi nó mở rộng và chạm ra ngoài,
+                    // bạn sẽ cần một logic khác vì khi mở rộng, FLAG_WATCH_OUTSIDE_TOUCH bị xóa.
+                    return false // Trả về false để các view khác có thể xử lý sự kiện này
+                }
+
                 // Check if touch is within the button bounds (48dp circle)
                 val density = this@AssistantMenuService.resources.displayMetrics.density
                 val buttonRadius = 24 * density // 24dp radius for 48dp button
@@ -288,6 +304,10 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                             params.x = newX.coerceIn(0, (metrics.widthPixels - iconSize).toInt())
                             params.y = newY.coerceIn(0, (metrics.heightPixels - iconSize).toInt())
 
+                            menuOffsetState.value = (
+                                    IntOffset(params.x, params.y)
+                                    )
+
                             windowManager.updateViewLayout(floatingView, params)
                             // Update Compose state
                             //menuOffsetState.value = IntOffset(0, 0) // Reset offset
@@ -296,13 +316,23 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                     }
 
                     MotionEvent.ACTION_UP -> {
-                        menuOffsetState.setMenuOffset(
-                            IntOffset(params.x.toInt(), params.y.toInt())
-                        )
+                        menuOffsetState.value = (
+                                IntOffset(params.x, params.y)
+                                )
                         if (!isDragging) {
                             toggleMenuOpenState()
                         }
                         isDragging = false
+                        return true
+                    }
+
+                    MotionEvent.ACTION_OUTSIDE -> {
+                        menuOffsetState.value = (
+                                IntOffset(params.x, params.y)
+                                )
+                        toggleMenuCloseState()
+                        isDragging = false
+                        Log.d("Testing", "Clicked outside")
                         return true
                     }
                 }
@@ -326,6 +356,13 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
 
+
+        // QUAN TRỌNG: Đảm bảo params.x và params.y là vị trí hiện tại của icon
+        // trước khi cập nhật layout với WRAP_CONTENT.
+        val currentOffset = menuOffsetState.value
+        params.x = currentOffset.x
+        params.y = currentOffset.y
+
         windowManager.updateViewLayout(floatingView, params)
     }
 
@@ -342,6 +379,12 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+
+        // QUAN TRỌNG: Đảm bảo params.x và params.y là vị trí hiện tại của icon
+        // trước khi cập nhật layout với WRAP_CONTENT.
+        val currentOffset = menuOffsetState.value
+        params.x = currentOffset.x
+        params.y = currentOffset.y
 
         windowManager.updateViewLayout(floatingView, params)
     }

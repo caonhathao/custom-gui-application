@@ -38,6 +38,7 @@ import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.heightIn
@@ -47,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -72,13 +74,24 @@ fun AssistantMenuModule(
     if (isExpanded) {
         Box(
             modifier = Modifier
-                .wrapContentSize()
-                .background(Color.Red)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    onToggleClose()
+                .fillMaxSize()
+                .background(Color.Transparent)
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { offset ->
+                            // offset ở đây là vị trí chạm so với Box này.
+                            // Bạn có thể thêm logic để kiểm tra xem chạm có nằm trong
+                            // vùng trực quan của menu chính hay không, nếu menu không chiếm toàn bộ Box.
+                            // Tuy nhiên, nếu menu chính nằm bên trong Box này và không có xử lý chạm riêng
+                            // cho nền của nó, thì mọi chạm vào Box này mà không trúng một phần tử con
+                            // có thể click được sẽ kích hoạt onTap này.
+                            Log.d(
+                                "AssistantMenuModule",
+                                "Tap outside detected by Box, closing menu."
+                            )
+                            onToggleClose() // Gọi hàm để đóng menu
+                        }
+                    )
                 }
         ) {
             val density = LocalDensity.current
@@ -91,7 +104,7 @@ fun AssistantMenuModule(
             val screenHeightPx = with(density) { screenHeightDp.toPx() }
 
             // Menu size estimation (you can adjust based on your content)
-            val menuWidthDp = 200.dp  // Adjust based on your menu content
+            val menuWidthDp = 260.dp  // Adjust based on your menu content
             val menuHeightDp = 160.dp // Adjust based on your menu content
             val menuWidthPx = with(density) { menuWidthDp.toPx() }
             val menuHeightPx = with(density) { menuHeightDp.toPx() }
@@ -115,12 +128,14 @@ fun AssistantMenuModule(
                 // Ràng buộc biên để menu không tràn ra ngoài màn hình
                 val finalX = targetX.coerceIn(
                     0f,
-                    (screenWidthPx - menuWidthPx).coerceAtLeast(0f)
+                    (screenWidthPx - buttonSize - menuWidthPx).coerceAtLeast(0f)
                 )
                 val finalY = targetY.coerceIn(
                     0f,
-                    (screenHeightPx - menuHeightPx).coerceAtLeast(0f)
+                    (screenHeightPx - buttonSize - menuHeightPx).coerceAtLeast(0f)
                 )
+
+                Log.d("AssistantMenu", "finalX: $finalX finalY: $finalY")
 
                 IntOffset(finalX.toInt(), finalY.toInt())
             }
