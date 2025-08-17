@@ -1,0 +1,13 @@
+<!-- res/layout/activity_quick_settings.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:background="@color/background_color"
+    android:orientation="vertical">
+
+    <!-- Include panel network -->
+    <include layout="@layout/panel_network" />
+    <include layout="@layout/panel_group_1" />
+    <include layout="@layout/panel_group_2" />
+</LinearLayout>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">customui</string>
+    <string name="accessibility_service_description">description</string>
+</resources>
