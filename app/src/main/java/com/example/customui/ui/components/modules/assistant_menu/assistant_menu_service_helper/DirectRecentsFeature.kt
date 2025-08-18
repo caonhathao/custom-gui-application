@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.customui.ui.classes.Accessibility
 import compose.icons.FeatherIcons
@@ -19,6 +20,7 @@ class DirectRecentsFeature : _interfaceHelper {
     private val iconChanged = FeatherIcons.Square
     private val handler = Handler(Looper.getMainLooper())
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun performRecentsGesture(): Boolean {
         val service = Accessibility.instance ?: return false
 
@@ -29,20 +31,46 @@ class DirectRecentsFeature : _interfaceHelper {
                 val height = displayMetrics.heightPixels.toFloat()
 
                 // Gesture recents - vuốt từ dưới lên và dừng ở giữa (không vuốt hết)
-                val startX = width / 2f
-                val startY = height - 10f
-                val midX = width / 2f
-                val midY = height * 0.2f // Dừng ở giữa màn hình
+                val startX = width / 3f
+                val startY = height - 1f
+                val midX = width / 3f
+                val midY = height * 0.9f // Dừng ở giữa màn hình
 
                 val path = Path().apply {
                     moveTo(startX, startY)
                     lineTo(midX, midY)
                 }
 
-                // Recents gesture cần thời gian dài hơn và có thể cần "hold"
-                val strokeDescription = GestureDescription.StrokeDescription(path, 0, 600)
+                // Stroke 1: Vuốt đến điểm giữ
+                // Tham số cuối cùng (willContinue) là true để báo rằng cử chỉ sẽ tiếp tục
+                val stroke1 = GestureDescription.StrokeDescription(
+                    path,
+                    0L, // Bắt đầu ngay
+                    300,
+                    true // Sẽ có stroke tiếp theo tiếp nối cử chỉ này
+                )
+
+                // Path cho hành động giữ (thực chất là một điểm, không di chuyển)
+                // Stroke tiếp theo sẽ bắt đầu từ điểm cuối của stroke1
+                val holdPath = Path().apply {
+                    moveTo(midX, midY) // Bắt đầu tại điểm giữ
+                    lineTo(midX, midY) // Kết thúc cũng tại điểm giữ (không di chuyển)
+                }
+
+                // Stroke 2: Giữ tại điểm đó
+                // startTime cho stroke này là thời gian kết thúc của stroke trước đó
+                val stroke2 = GestureDescription.StrokeDescription(
+                    holdPath,
+                    300, // Bắt đầu SAU KHI stroke1 hoàn thành
+                    300,
+                    false // Đây là stroke cuối cùng của cử chỉ này
+                )
+
                 val gestureBuilder = GestureDescription.Builder()
-                val gesture = gestureBuilder.addStroke(strokeDescription).build()
+                gestureBuilder.addStroke(stroke1)
+                gestureBuilder.addStroke(stroke2) // Thêm stroke thứ hai
+
+                val gesture = gestureBuilder.build()
 
                 val callback = object : AccessibilityService.GestureResultCallback() {
                     override fun onCompleted(gestureDescription: GestureDescription?) {
