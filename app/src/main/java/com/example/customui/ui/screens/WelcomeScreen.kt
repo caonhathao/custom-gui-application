@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
 @Composable
-fun WelcomeScreen(onContinue: () -> Unit) {
+fun WelcomeScreen(onContinue:() -> Unit) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.padding(24.dp),
