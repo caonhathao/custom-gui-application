@@ -17,7 +17,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.ComposeView
@@ -37,11 +36,12 @@ import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import com.example.customui.R
 import com.example.customui.ui.components.modules.assistant_menu.AssistantMenuModule
-import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.DirectBackFeature
-import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.DirectHomeFeature
-import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.DirectRecentsFeature
-import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.FlashlightFeature
-import com.example.customui.ui.components.modules.assistant_menu.assistant_menu_service_helper.WifiFeature
+import com.example.customui.ui.components.modules.assistant_menu.modules.DirectBackFeature
+import com.example.customui.ui.components.modules.assistant_menu.modules.DirectHomeFeature
+import com.example.customui.ui.components.modules.assistant_menu.modules.DirectRecentsFeature
+import com.example.customui.ui.components.modules.assistant_menu.modules.FlashlightFeature
+import com.example.customui.ui.components.modules.assistant_menu.modules.ScreenshotFeature
+import com.example.customui.ui.components.modules.assistant_menu.modules.WifiFeature
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -128,6 +128,7 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                     listOf(
                         WifiFeature(this@AssistantMenuService),
                         FlashlightFeature(this@AssistantMenuService),
+                        ScreenshotFeature(this@AssistantMenuService),
                         DirectBackFeature(onCloseMenu = { toggleMenuCloseState() }),
                         DirectHomeFeature(),
                         DirectRecentsFeature()

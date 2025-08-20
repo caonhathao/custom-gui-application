@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +15,6 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.sharp.Info
 import androidx.compose.material.icons.sharp.Menu
 import androidx.compose.material.icons.sharp.Settings
-import androidx.compose.material.icons.sharp.ThumbUp
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -45,7 +43,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.customui.ui.screens.actioncenter.ActionCenter
-import com.example.customui.ui.screens.wallpaper.ActionCenterDetail
+import com.example.customui.ui.screens.actioncenter.ActionCenterDetail
 import com.example.customui.ui.screens.wallpaper.WallpaperDetail
 import com.example.customui.ui.screens.wallpaper.WallpaperScreen
 import com.example.customui.ui.screens.widgets.Widgets

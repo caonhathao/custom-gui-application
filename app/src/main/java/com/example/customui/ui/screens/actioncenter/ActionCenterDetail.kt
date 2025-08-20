@@ -1,6 +1,9 @@
-package com.example.customui.ui.screens.wallpaper
+package com.example.customui.ui.screens.actioncenter
 
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +44,11 @@ import kotlinx.coroutines.withContext
 @Composable
 fun ActionCenterDetail(imageLink: String) {
     val context = LocalContext.current
+    val activity = LocalActivity.current
     var isApplying by remember { mutableStateOf(false) }
+
+    var services: MutableList<String> = mutableListOf()
+    services = (services + "Screenshot") as MutableList<String>
 
     Column(
         modifier = Modifier
@@ -80,14 +87,17 @@ fun ActionCenterDetail(imageLink: String) {
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        var result = setActionCenterTheme(context)
-                        withContext(Dispatchers.Main) {
-                            isApplying = true
-                            Toast.makeText(context, "Wallpaper applied!", Toast.LENGTH_SHORT).show()
-                        }
+                        (activity as? ComponentActivity)?.let { nonNullActivity ->
+                            val result = nonNullActivity.setActionCenterTheme(services)
+                            withContext(Dispatchers.Main) {
+                                isApplying = true
+                                Toast.makeText(context, "Wallpaper applied!", Toast.LENGTH_SHORT).show()
+                            }
 
-                        if (result) isApplying = false
+                            if (result) isApplying = false
+                        }
                     } catch (e: Exception) {
+                        Log.d("Exception", "Exception: $e")
                         withContext(Dispatchers.Main) {
                             isApplying = false
                             Toast.makeText(context, "Failed to apply wallpaper", Toast.LENGTH_SHORT)
