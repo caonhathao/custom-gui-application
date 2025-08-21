@@ -1,10 +1,5 @@
 package com.example.customui.ui.components.modules.assistant_menu
 
-import android.accessibilityservice.GestureDescription
-import android.graphics.Path
-import android.os.Build
-import android.os.Handler
-import android.os.Looper
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.layout.Column
@@ -35,7 +30,6 @@ import androidx.compose.ui.unit.IntOffset
 import com.example.customui.ui.components.custom.WrapContentGrid
 
 import android.util.Log
-import android.view.MotionEvent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -49,17 +43,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntSize
 import com.example.customui.R
 import com.example.customui.services.assistantmenu.AssistantMenuServiceHelper
-import com.example.customui.ui.classes.Accessibility
 
 @Composable
 fun AssistantMenuModule(
@@ -79,12 +70,6 @@ fun AssistantMenuModule(
                 .pointerInput(Unit) {
                     detectTapGestures(
                         onTap = { offset ->
-                            // offset ở đây là vị trí chạm so với Box này.
-                            // Bạn có thể thêm logic để kiểm tra xem chạm có nằm trong
-                            // vùng trực quan của menu chính hay không, nếu menu không chiếm toàn bộ Box.
-                            // Tuy nhiên, nếu menu chính nằm bên trong Box này và không có xử lý chạm riêng
-                            // cho nền của nó, thì mọi chạm vào Box này mà không trúng một phần tử con
-                            // có thể click được sẽ kích hoạt onTap này.
                             Log.d(
                                 "AssistantMenuModule",
                                 "Tap outside detected by Box, closing menu."
@@ -208,9 +193,8 @@ fun AssistantMenuModule(
     } else {
         Box(
             modifier = Modifier
-                .background(Color.LightGray, shape = RoundedCornerShape(16.dp))
                 .size(48.dp)
-                .border(2.dp, Color.DarkGray, shape = RoundedCornerShape(16.dp)),
+                .border(2.dp, MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -218,6 +202,15 @@ fun AssistantMenuModule(
                 contentDescription = "Assistant Menu",
                 tint = Color.White,
                 modifier = Modifier.size(32.dp)
+            )
+            Image(
+                painter = painterResource(id = R.drawable.bg_menu),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                alignment = Alignment.TopStart,
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(16.dp)),
             )
         }
     }

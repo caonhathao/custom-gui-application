@@ -1,6 +1,7 @@
 package com.example.customui.navigation
 
 
+import android.net.Uri
 import com.example.customui.ui.layout.MainLayout
 import com.example.customui.ui.screens.WelcomeScreen
 import androidx.compose.animation.*
@@ -15,7 +16,9 @@ import androidx.navigation.navArgument
 import com.example.customui.ui.screens.wallpaper.WallpaperDetail
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(
+    onToggleTheme: () -> Unit = {}
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -39,7 +42,9 @@ fun AppNavigation() {
         }
         composable("main") {
             MainLayout(
-                onToggleTheme = {}
+                onOpenDetail = { imageUrl ->
+                    navController.navigate("detail/${Uri.encode(imageUrl)}")
+                }
             )
         }
         composable(

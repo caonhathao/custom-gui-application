@@ -128,7 +128,7 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                     listOf(
                         WifiFeature(this@AssistantMenuService),
                         FlashlightFeature(this@AssistantMenuService),
-                        ScreenshotFeature(this@AssistantMenuService),
+//                        ScreenshotFeature(this@AssistantMenuService),
                         DirectBackFeature(onCloseMenu = { toggleMenuCloseState() }),
                         DirectHomeFeature(),
                         DirectRecentsFeature()
