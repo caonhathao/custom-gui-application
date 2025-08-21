@@ -3,13 +3,18 @@ package com.example.customui.ui.screens.wallpaper
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.customui.ui.components.set.setWallpaperFromUrl
 import com.example.customui.utils.GradientText
+import com.example.customui.utils.LinearGradientBrush
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,7 +53,7 @@ fun WallpaperDetail(imageLink: String) {
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
@@ -74,6 +80,37 @@ fun WallpaperDetail(imageLink: String) {
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
+        }
+
+        Column (
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .border(
+                    2.dp, LinearGradientBrush(
+                        colors = listOf(
+                            Color(0xFF9D6BFF), // tím
+                            Color(0xFF00D1FF), // xanh
+                            Color(0xFFFF57B9)  // hồng
+                        )
+                    ), RoundedCornerShape(16.dp)
+                )
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            val dataSample = listOf<String>("a", "b", "c", "d", "e")
+            dataSample.forEachIndexed { index, value ->
+                GradientText(
+                    text = "${index + 1}. $value",
+                    colors = listOf(
+                        Color(0xFF9D6BFF), // tím
+                        Color(0xFF00D1FF), // xanh
+                        Color(0xFFFF57B9)  // hồng
+                    ),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
 
         Button(

@@ -37,6 +37,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -54,10 +56,11 @@ import compose.icons.feathericons.Image
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainLayout(
+    onOpenDetail: (String) -> Unit,
     onToggleTheme: () -> Unit = {}
 ) {
-    var selectedIndex by remember { mutableIntStateOf(0) }
     val navController = rememberNavController()
+    var selectedIndex by remember { mutableIntStateOf(0) }
     val routes = listOf("wallpapers", "actioncenter", "widgets")
 
     Scaffold(
@@ -174,27 +177,13 @@ fun MainLayout(
         ) {
             composable("wallpapers") {
                 WallpaperScreen() { imageUrl ->
-                    navController.navigate("wallpaper-detail/${Uri.encode(imageUrl)}")
-                }
-            }
-            composable(
-                "wallpaper-detail/{imageUrl}",
-                arguments = listOf(navArgument("imageUrl") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
-                WallpaperDetail(imageUrl)
+                    onOpenDetail(imageUrl)                }
             }
 
             composable("actioncenter") {
-                ActionCenter(){imageUrl->
-                navController.navigate("action-center-detail/${Uri.encode(imageUrl)}")}
-            }
-            composable(
-                "action-center-detail/{imageUrl}",
-                arguments = listOf(navArgument("imageUrl") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
-                ActionCenterDetail(imageUrl)
+                ActionCenter() { imageUrl ->
+                    onOpenDetail(imageUrl)
+                }
             }
 
             composable("widgets") {

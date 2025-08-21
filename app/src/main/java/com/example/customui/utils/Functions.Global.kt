@@ -19,6 +19,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.TextUnit
 
+fun LinearGradientBrush(colors: List<Color>): Brush {
+    val result = Brush.linearGradient(
+        colors = colors,
+        start = Offset.Zero,
+        end = Offset.Infinite
+    )
+    return result
+}
+
 @Composable
 fun GradientText(
     text: String,
@@ -29,11 +38,7 @@ fun GradientText(
     fontFamily: FontFamily = FontFamily.SansSerif,
     style: TextStyle = TextStyle.Default
 ) {
-    val gradientBrush = Brush.linearGradient(
-        colors = colors,
-        start = Offset(0f, 0f),
-        end = Offset(500f, 0f) // có thể dùng size.width nếu muốn động hơn
-    )
+    val gradientBrush = LinearGradientBrush(colors)
 
     Text(
         text = text,
