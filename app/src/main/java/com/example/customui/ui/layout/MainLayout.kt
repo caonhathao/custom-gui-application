@@ -1,6 +1,5 @@
 package com.example.customui.ui.layout
 
-import android.net.Uri
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -11,8 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.sharp.Info
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.sharp.Menu
 import androidx.compose.material.icons.sharp.Settings
 import androidx.compose.material3.BottomAppBar
@@ -37,31 +35,26 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.customui.ui.screens.actioncenter.ActionCenter
-import com.example.customui.ui.screens.actioncenter.ActionCenterDetail
-import com.example.customui.ui.screens.wallpaper.WallpaperDetail
 import com.example.customui.ui.screens.wallpaper.WallpaperScreen
 import com.example.customui.ui.screens.widgets.Widgets
 import com.example.customui.utils.GradientText
 import compose.icons.FeatherIcons
+import compose.icons.feathericons.ArrowDownCircle
 import compose.icons.feathericons.Image
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainLayout(
-    onOpenDetail: (String) -> Unit,
+    onOpenDetail: (String, String) -> Unit,
     onToggleTheme: () -> Unit = {}
 ) {
     val navController = rememberNavController()
     var selectedIndex by remember { mutableIntStateOf(0) }
-    val routes = listOf("wallpapers", "actioncenter", "widgets")
+    val routes = listOf("wallpapers", "action-center", "widgets")
 
     Scaffold(
         topBar = {
@@ -95,7 +88,7 @@ fun MainLayout(
                             disabledContentColor = Color.Transparent
                         )
                     ) {
-                        Icon(Icons.Sharp.Info, contentDescription = "Thông tin")
+                        Icon(FeatherIcons.ArrowDownCircle, contentDescription = "Thông tin")
                     }
                     IconButton(
                         onClick = {},
@@ -106,7 +99,7 @@ fun MainLayout(
                             disabledContentColor = Color.Transparent
                         )
                     ) {
-                        Icon(Icons.Default.Email, contentDescription = "Góp ý")
+                        Icon(Icons.Default.Info, contentDescription = "Góp ý")
                     }
                 },
             )
@@ -176,13 +169,14 @@ fun MainLayout(
             modifier = Modifier.padding(innerPadding)
         ) {
             composable("wallpapers") {
-                WallpaperScreen() { imageUrl ->
-                    onOpenDetail(imageUrl)                }
+                WallpaperScreen() { cardID ->
+                    onOpenDetail("wallpaper", cardID)
+                }
             }
 
-            composable("actioncenter") {
-                ActionCenter() { imageUrl ->
-                    onOpenDetail(imageUrl)
+            composable("action-center") {
+                ActionCenter() { cardID ->
+                    onOpenDetail("action-center", cardID)
                 }
             }
 

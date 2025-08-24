@@ -6,17 +6,26 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.example.customui.ui.components.modules.assistant_menu.modules.ListFeatures
 import com.example.customui.ui.components.set.setActionCenterTheme
 import com.example.customui.utils.GradientText
 import kotlinx.coroutines.CoroutineScope
@@ -47,19 +58,22 @@ fun ActionCenterDetail(imageLink: String) {
     val activity = LocalActivity.current
     var isApplying by remember { mutableStateOf(false) }
 
+    var listFeatures = ListFeatures()
+
     var services: MutableList<String> = mutableListOf()
     services = (services + "Screenshot") as MutableList<String>
 
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(8.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Image(
@@ -83,6 +97,86 @@ fun ActionCenterDetail(imageLink: String) {
             )
         }
 
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            GradientText(
+                text = "Features",
+                colors = listOf(
+                    Color(0xFF9D6BFF),
+                    Color(0xFF00D1FF),
+                    Color(0xFFFF57B9)
+                ),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4), // 4 cột cố định
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .border(
+                        2.dp,
+                        Brush.linearGradient(
+                            colors = listOf(
+                                Color(0xFF9D6BFF), // tím
+                                Color(0xFF00D1FF), // xanh
+                                Color(0xFFFF57B9)  // hồng
+                            )
+                        ),
+                        RoundedCornerShape(16.dp)
+                    )
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(8.dp)
+            ) {
+                val data = listFeatures.getFeatures()
+
+                items(data.size) { index ->
+                    val value = data[index]
+                    Button(
+                        onClick = {},
+                        modifier = Modifier
+                            .aspectRatio(1f) // giữ box vuông đều
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Transparent
+                        ),
+                        contentPadding = PaddingValues(1.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(2.dp),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = value.second,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text = value.first,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                    }
+                }
+            }
+        }
+
         Button(
             onClick = {
                 CoroutineScope(Dispatchers.IO).launch {
@@ -91,7 +185,8 @@ fun ActionCenterDetail(imageLink: String) {
                             val result = nonNullActivity.setActionCenterTheme(services)
                             withContext(Dispatchers.Main) {
                                 isApplying = true
-                                Toast.makeText(context, "Wallpaper applied!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Wallpaper applied!", Toast.LENGTH_SHORT)
+                                    .show()
                             }
 
                             if (result) isApplying = false
@@ -124,14 +219,10 @@ fun ActionCenterDetail(imageLink: String) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Applying...")
             } else
-                GradientText(
+                Text(
                     text = "Apply",
-                    colors = listOf(
-                        Color(0xFFFFA5A5),
-                        Color(0xFF00D1FF),
-                        Color(0xFFFF57B9)
-                    ),
-                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
         }

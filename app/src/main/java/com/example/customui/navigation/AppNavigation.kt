@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.customui.ui.screens.actioncenter.ActionCenterDetail
 import com.example.customui.ui.screens.wallpaper.WallpaperDetail
 
 @Composable
@@ -42,17 +43,26 @@ fun AppNavigation(
         }
         composable("main") {
             MainLayout(
-                onOpenDetail = { imageUrl ->
-                    navController.navigate("detail/${Uri.encode(imageUrl)}")
+                onOpenDetail = {type, imageUrl ->
+                    navController.navigate("detail/${type}/${Uri.encode(imageUrl)}")
                 }
             )
         }
         composable(
-            route = "detail/{imageUrl}",
-            arguments = listOf(navArgument("imageUrl") { type = NavType.StringType })
+            route = "detail/{type}/{cardID}",
+            arguments = listOf(
+                navArgument("type") { type = NavType.StringType },
+                navArgument("cardID") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
-            val imageUrl = backStackEntry.arguments?.getString("imageUrl") ?: ""
-            WallpaperDetail(imageUrl)
+            val type = backStackEntry.arguments?.getString("type") ?: ""
+            val cardID = backStackEntry.arguments?.getString("cardID") ?: ""
+
+            when (type) {
+                "wallpaper" -> WallpaperDetail(cardID)
+                "action-center" -> ActionCenterDetail(cardID)
+            }
         }
+
     }
 }
