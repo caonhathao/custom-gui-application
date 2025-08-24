@@ -42,6 +42,7 @@ import com.example.customui.ui.components.modules.assistant_menu.modules.DirectR
 import com.example.customui.ui.components.modules.assistant_menu.modules.FlashlightFeature
 import com.example.customui.ui.components.modules.assistant_menu.modules.ScreenshotFeature
 import com.example.customui.ui.components.modules.assistant_menu.modules.WifiFeature
+import com.example.customui.ui.components.modules.assistant_menu.modules.BluetoothFeature
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -127,6 +128,7 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                 var menuManager = AssistantMenuServiceHelper(
                     listOf(
                         WifiFeature(this@AssistantMenuService),
+                        BluetoothFeature(this@AssistantMenuService),
                         FlashlightFeature(this@AssistantMenuService),
 //                        ScreenshotFeature(this@AssistantMenuService),
                         DirectBackFeature(onCloseMenu = { toggleMenuCloseState() }),

@@ -1,7 +1,6 @@
 package com.example.customui.ui.screens.wallpaper
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.example.customui.data.`class`.WallpaperData
+import com.example.customui.data.type.WallpaperData
 import com.example.customui.ui.components.modules.elements.ImageCard
 import com.example.customui.ui.components.loading.LoadingScreen
 import kotlinx.coroutines.delay
@@ -29,6 +28,7 @@ fun loadWallpapersFromAssets(context: Context, fileName: String): WallpaperData 
     val response = Json.decodeFromString<WallpaperData>(jsonString)
     return response
 }
+
 @Composable
 fun WallpaperScreen(onCardClick: (String) -> Unit) {
     val configuration = LocalConfiguration.current
@@ -71,7 +71,6 @@ fun WallpaperScreen(onCardClick: (String) -> Unit) {
                     }
                 }
             }
-
         }
     }
 }
