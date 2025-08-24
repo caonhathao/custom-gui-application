@@ -11,9 +11,8 @@ import coil.request.ImageRequest
 import coil.request.SuccessResult
 
 @RequiresPermission(Manifest.permission.SET_WALLPAPER)
-suspend fun setWallpaperFromUrl(context: Context, imageUrl: String): Boolean {
+suspend fun setWallpaperFromUrl(context: Context, imageUrl: String?): Boolean {
     return try {
-        // Tải ảnh bằng Coil
         val loader = ImageLoader(context)
         val request = ImageRequest.Builder(context)
             .data(imageUrl)
