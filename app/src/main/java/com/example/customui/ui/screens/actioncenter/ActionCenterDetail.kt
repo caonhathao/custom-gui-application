@@ -1,5 +1,6 @@
 package com.example.customui.ui.screens.actioncenter
 
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -29,6 +30,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,187 +46,270 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.customui.ui.components.modules.assistant_menu.modules.ListFeatures
+import com.example.customui.data.type.ActionCenterDetailResponse
+import com.example.customui.data.type.ActionCenterDetailType
+import com.example.customui.data.type.WallpaperDetailResponse
+import com.example.customui.data.type.WallpaperDetailType
+import com.example.customui.ui.components.loading.LoadingScreen
+import com.example.customui.ui.components.modules.assistant_menu.ListFeatures
 import com.example.customui.ui.components.set.setActionCenterTheme
+import com.example.customui.ui.screens.wallpaper.loadWallpaperDetailFromAssets
 import com.example.customui.utils.GradientText
+import com.example.customui.utils.LinearGradientBrush
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+
+fun loadActionCenterDetailFromAssets(
+    context: Context,
+    fileName: String,
+    targetId: String
+): ActionCenterDetailType? {
+    val jsonString = context.assets.open(fileName).bufferedReader().use { it.readText() }
+    val response = Json.decodeFromString<ActionCenterDetailResponse>(jsonString)
+    return response.data.find { it.id == targetId }
+}
 
 @Composable
-fun ActionCenterDetail(imageLink: String) {
+fun ActionCenterDetail(cardID: String) {
     val context = LocalContext.current
     val activity = LocalActivity.current
     var isApplying by remember { mutableStateOf(false) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    var data by remember { mutableStateOf<ActionCenterDetailType?>(null) }
 
     var listFeatures = ListFeatures()
 
     var services: MutableList<String> = mutableListOf()
     services = (services + "Screenshot") as MutableList<String>
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+    // Khi composable được gọi, bắt đầu load data
+    LaunchedEffect(Unit) {
+        delay(2000)
+        data = loadActionCenterDetailFromAssets(
+            context,
+            "actioncenter-detail-fake-data.json",
+            targetId = cardID // id cần tìm
+        )
+        isLoading = false
+    }
 
+    if (isLoading) {
+        LoadingScreen()
+    } else {
         Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Image(
-                painter = rememberAsyncImagePainter(model = imageLink),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .width(250.dp)
-                    .padding(22.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            )
-            GradientText(
-                text = "Wallpaper",
-                colors = listOf(
-                    Color(0xFF9D6BFF), // tím
-                    Color(0xFF00D1FF), // xanh
-                    Color(0xFFFF57B9)  // hồng
-                ),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            GradientText(
-                text = "Features",
-                colors = listOf(
-                    Color(0xFF9D6BFF),
-                    Color(0xFF00D1FF),
-                    Color(0xFFFF57B9)
-                ),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(4), // 4 cột cố định
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(model = data?.ActionCenterImage[0]?.image),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .width(250.dp)
+                        .padding(22.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                )
+                GradientText(
+                    text = data?.name,
+                    colors = listOf(
+                        Color(0xFF9D6BFF), // tím
+                        Color(0xFF00D1FF), // xanh
+                        Color(0xFFFF57B9)  // hồng
+                    ),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(16.dp))
                     .border(
-                        2.dp,
-                        Brush.linearGradient(
+                        2.dp, LinearGradientBrush(
                             colors = listOf(
                                 Color(0xFF9D6BFF), // tím
                                 Color(0xFF00D1FF), // xanh
                                 Color(0xFFFF57B9)  // hồng
                             )
-                        ),
-                        RoundedCornerShape(16.dp)
+                        ), RoundedCornerShape(16.dp)
                     )
-                    .padding(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                contentPadding = PaddingValues(8.dp)
             ) {
-                val data = listFeatures.getFeatures()
+                GradientText(
+                    text = "Artist: ${data?.ActionCenterDetail?.artist}",
+                    colors = listOf(
+                        Color(0xFF9D6BFF), // tím
+                        Color(0xFF00D1FF), // xanh
+                        Color(0xFFFF57B9)  // hồng
+                    ),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                GradientText(
+                    text = "Created at: ${data?.ActionCenterDetail?.createdAt}",
+                    colors = listOf(
+                        Color(0xFF9D6BFF), // tím
+                        Color(0xFF00D1FF), // xanh
+                        Color(0xFFFF57B9)  // hồng
+                    ),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
 
-                items(data.size) { index ->
-                    val value = data[index]
-                    Button(
-                        onClick = {},
-                        modifier = Modifier
-                            .aspectRatio(1f) // giữ box vuông đều
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(MaterialTheme.colorScheme.primary)
-                            .padding(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Transparent,
-                            contentColor = Color.Transparent
-                        ),
-                        contentPadding = PaddingValues(1.dp)
-                    ) {
-                        Column(
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                GradientText(
+                    text = "Available features",
+                    colors = listOf(
+                        Color(0xFF9D6BFF),
+                        Color(0xFF00D1FF),
+                        Color(0xFFFF57B9)
+                    ),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(4), // 4 cột cố định
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .border(
+                            2.dp,
+                            Brush.linearGradient(
+                                colors = listOf(
+                                    Color(0xFF9D6BFF), // tím
+                                    Color(0xFF00D1FF), // xanh
+                                    Color(0xFFFF57B9)  // hồng
+                                )
+                            ),
+                            RoundedCornerShape(16.dp)
+                        )
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(8.dp)
+                ) {
+                    val data = listFeatures.getFeatures()
+
+                    items(data.size) { index ->
+                        val value = data[index]
+                        Button(
+                            onClick = {},
                             modifier = Modifier
-                                .fillMaxSize()
-                                .padding(2.dp),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .aspectRatio(1f) // giữ box vuông đều
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.primary)
+                                .padding(8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.Transparent
+                            ),
+                            contentPadding = PaddingValues(1.dp)
                         ) {
-                            Icon(
-                                imageVector = value.second,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(Modifier.height(4.dp))
-                            Text(
-                                text = value.first,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(2.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    imageVector = value.second,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text(
+                                    text = value.first,
+                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
 
+                        }
                     }
                 }
             }
-        }
 
-        Button(
-            onClick = {
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        (activity as? ComponentActivity)?.let { nonNullActivity ->
-                            val result = nonNullActivity.setActionCenterTheme(services)
+            Button(
+                onClick = {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            (activity as? ComponentActivity)?.let { nonNullActivity ->
+                                val result = nonNullActivity.setActionCenterTheme(services)
+                                withContext(Dispatchers.Main) {
+                                    isApplying = true
+                                    Toast.makeText(
+                                        context,
+                                        "Theme quick setting applied!",
+                                        Toast.LENGTH_SHORT
+                                    )
+                                        .show()
+                                }
+
+                                if (result) isApplying = false
+                            }
+                        } catch (e: Exception) {
+                            Log.d("Exception", "Exception: $e")
                             withContext(Dispatchers.Main) {
-                                isApplying = true
-                                Toast.makeText(context, "Wallpaper applied!", Toast.LENGTH_SHORT)
+                                isApplying = false
+                                Toast.makeText(
+                                    context,
+                                    "Failed to apply theme",
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             }
-
-                            if (result) isApplying = false
-                        }
-                    } catch (e: Exception) {
-                        Log.d("Exception", "Exception: $e")
-                        withContext(Dispatchers.Main) {
-                            isApplying = false
-                            Toast.makeText(context, "Failed to apply wallpaper", Toast.LENGTH_SHORT)
-                                .show()
                         }
                     }
-                }
-            },
-            enabled = !isApplying,
-            shape = RoundedCornerShape(8.dp),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
-            colors =
-                ButtonDefaults.buttonColors(
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-        ) {
-            if (isApplying) {
-                CircularProgressIndicator(
-                    color = Color.White,
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Applying...")
-            } else
-                Text(
-                    text = "Apply",
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                },
+                enabled = !isApplying,
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.secondary),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+            ) {
+                if (isApplying) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Applying...")
+                } else
+                    Text(
+                        text = "Apply",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+            }
         }
     }
 }

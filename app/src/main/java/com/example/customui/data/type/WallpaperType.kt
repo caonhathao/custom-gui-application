@@ -1,4 +1,4 @@
-package com.example.customui.data.`class`
+package com.example.customui.data.type
 
 import kotlinx.serialization.Serializable
 

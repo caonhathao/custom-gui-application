@@ -35,8 +35,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.customui.data.`class`.WallpaperDetailResponse
-import com.example.customui.data.`class`.WallpaperDetailType
+import com.example.customui.data.type.WallpaperDetailResponse
+import com.example.customui.data.type.WallpaperDetailType
 import com.example.customui.ui.components.loading.LoadingScreen
 import com.example.customui.ui.components.set.setWallpaperFromUrl
 import com.example.customui.utils.GradientText
@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
-fun loadWallpapersFromAssets(
+fun loadWallpaperDetailFromAssets(
     context: Context,
     fileName: String,
     targetId: String
@@ -69,15 +69,13 @@ fun WallpaperDetail(cardID: String) {
     // Khi composable được gọi, bắt đầu load data
     LaunchedEffect(Unit) {
         delay(2000)
-        data = loadWallpapersFromAssets(
+        data = loadWallpaperDetailFromAssets(
             context,
             "wallpaper-detail-fake-data.json",
             targetId = cardID // id cần tìm
         )
         isLoading = false
     }
-
-
 
     if (isLoading) {
         LoadingScreen()
