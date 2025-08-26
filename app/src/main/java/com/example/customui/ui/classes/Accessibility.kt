@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Log
 import android.view.accessibility.AccessibilityEvent
 import com.example.customui.services.assistantmenu.AssistantMenuService
-import com.example.customui.utils.NavigationUtils
+import com.example.customui.ui.components.modules.assistant_menu.NavigationUtils
 
 
 class Accessibility : AccessibilityService() {

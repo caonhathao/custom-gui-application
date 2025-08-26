@@ -47,10 +47,9 @@ fun ActionCenter(onCardClick: (String) -> Unit) {
     // Khi composable được gọi, bắt đầu load data
     LaunchedEffect(Unit) {
         // Giả lập gọi API
-        delay(2000)
         actionCenters = loadActionCentersFromAssets(context, "actioncenter-fake-data.json")
-
         isLoading = false
+        delay(500)
     }
 
     if (isLoading) {

@@ -1,5 +1,4 @@
-// NavigationUtils.kt - Utility để detect navigation mode
-package com.example.customui.utils
+package com.example.customui.ui.components.modules.assistant_menu
 
 import android.content.Context
 import android.content.res.Resources

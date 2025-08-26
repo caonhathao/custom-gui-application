@@ -45,9 +45,9 @@ fun WallpaperScreen(onCardClick: (String) -> Unit) {
     // Khi composable được gọi, bắt đầu load data
     LaunchedEffect(Unit) {
         // Giả lập gọi API
-        delay(2000)
         wallpapers = loadWallpapersFromAssets(context, "wallpapers-fake-data.json")
         isLoading = false
+        delay(500)
     }
 
     if (isLoading) {
