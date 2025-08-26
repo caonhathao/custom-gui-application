@@ -97,6 +97,7 @@ class DirectRecentsFeature : _interfaceHelper {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun toggle(enable: Boolean) {
         Log.d("DirectRecentsFeature", "📱 Performing Recents action")
 
@@ -117,7 +118,7 @@ class DirectRecentsFeature : _interfaceHelper {
         }
     }
 
-    override fun isEnabled(): Boolean = true
+    override fun isEnabled(): Boolean = false
     override fun getDefaultIcon(): ImageVector = iconDefault
     override fun getChangedIcon(): ImageVector = iconChanged
 }

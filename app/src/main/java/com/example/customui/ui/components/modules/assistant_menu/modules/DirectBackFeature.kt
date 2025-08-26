@@ -92,7 +92,7 @@ class DirectBackFeature(private val onCloseMenu: () -> Unit) : _interfaceHelper 
         }
     }
 
-    override fun isEnabled(): Boolean = true
+    override fun isEnabled(): Boolean = false
     override fun getDefaultIcon(): ImageVector = iconDefault
     override fun getChangedIcon(): ImageVector = iconChanged
 }

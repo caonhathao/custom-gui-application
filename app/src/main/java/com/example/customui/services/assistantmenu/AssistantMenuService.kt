@@ -10,7 +10,9 @@ import android.content.Intent
 import android.content.res.Resources
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
@@ -46,6 +48,7 @@ import com.example.customui.ui.components.modules.assistant_menu.modules.Bluetoo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -55,7 +58,8 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
     private lateinit var windowManager: WindowManager
     private var floatingView: View? = null
 
-    private var menuOffsetState = mutableStateOf(IntOffset(100, 100))
+    private var menuOffsetState = mutableStateOf(IntOffset(0, 100))
+    private var lastMenuOffset = IntOffset(0, 0)
 
     private lateinit var composeView: ComposeView
     private lateinit var params: WindowManager.LayoutParams
@@ -140,9 +144,7 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                 AssistantMenuModule(
                     isExpanded = isMenuExpanded,
                     menuOffset = menuOffsetState.value,
-                    onToggleExpand = { toggleMenuOpenState() },
                     onToggleClose = { toggleMenuCloseState() },
-                    onCloseMenu = { stopSelf() }, // Ví dụ: đóng service
                     menuManager = menuManager
                 )
             }
@@ -283,40 +285,37 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
                         initialTouchY = event.rawY
                         isDragging = false
 
-                        Log.d("Event", "$initialTouchX $initialTouchY")
+//                        Log.d("Event", "$initialTouchX $initialTouchY")
                         return true // Quan trọng để nhận các event tiếp theo
                     }
 
                     MotionEvent.ACTION_MOVE -> {
-                        val deltaX = event.rawX - initialTouchX
-                        val deltaY = event.rawY - initialTouchY
+                        val deltaX = (event.rawX - initialTouchX).toInt()
+                        val deltaY = (event.rawY - initialTouchY).toInt()
 
-                        if (Math.abs(deltaX) > CLICK_DRAG_TOLERANCE || Math.abs(deltaY) > CLICK_DRAG_TOLERANCE) {
+                        if (abs(deltaX) > CLICK_DRAG_TOLERANCE || abs(deltaY) > CLICK_DRAG_TOLERANCE) {
                             isDragging = true
                         }
 
                         if (isDragging) {
-                            val newX = initialX + deltaX.toInt()
-                            val newY = initialY + deltaY.toInt()
-
-                            // KEY FIX: Get screen bounds and constrain properly
                             val metrics = Resources.getSystem().displayMetrics
                             val density = this@AssistantMenuService.resources.displayMetrics.density
-                            val iconSize = 48 * density // Approximate icon button size
+                            val iconSize = (48 * density).toInt()
 
-                            params.x = newX.coerceIn(0, (metrics.widthPixels - iconSize).toInt())
-                            params.y = newY.coerceIn(0, (metrics.heightPixels - iconSize).toInt())
+                            val newX = initialX + deltaX
+                            val newY = initialY + deltaY
 
-                            menuOffsetState.value = (
-                                    IntOffset(params.x, params.y)
-                                    )
+                            // 👇 Snap cạnh
+                            val snapToLeft = newX < metrics.widthPixels / 2
+                            params.x = if (snapToLeft) 0 else metrics.widthPixels - iconSize
+                            params.y = newY.coerceIn(0, metrics.heightPixels - iconSize)
 
+                            menuOffsetState.value = IntOffset(params.x, params.y)
                             windowManager.updateViewLayout(floatingView, params)
-                            // Update Compose state
-                            //menuOffsetState.value = IntOffset(0, 0) // Reset offset
                         }
                         return true
                     }
+
 
                     MotionEvent.ACTION_UP -> {
                         menuOffsetState.value = (
@@ -348,49 +347,51 @@ class AssistantMenuService : Service(), LifecycleOwner, ViewModelStoreOwner,
         isMenuExpanded = true
         Companion.isMenuExpanded = true
 
-        params.width =
-            WindowManager.LayoutParams.MATCH_PARENT // Khi mở rộng, chiếm toàn bộ chiều rộng
-        params.height =
-            WindowManager.LayoutParams.MATCH_PARENT // Khi mở rộng, chiếm toàn bộ chiều cao
+        lastMenuOffset = menuOffsetState.value
 
-        // Remove flags that prevent interaction
-        params.flags =
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+        params.apply {
+            x = 0
+            y = 0
+
+            width = WindowManager.LayoutParams.MATCH_PARENT // Khi mở rộng, chiếm toàn bộ chiều rộng
+            height = WindowManager.LayoutParams.MATCH_PARENT // Khi mở rộng, chiếm toàn bộ chiều cao
+
+            // Remove flags that prevent interaction
+            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                     WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-
-
-        // QUAN TRỌNG: Đảm bảo params.x và params.y là vị trí hiện tại của icon
-        // trước khi cập nhật layout với WRAP_CONTENT.
-        val currentOffset = menuOffsetState.value
-        params.x = currentOffset.x
-        params.y = currentOffset.y
+        }
 
         windowManager.updateViewLayout(floatingView, params)
     }
 
     private fun toggleMenuCloseState() {
-        //Log.d("AssistantMenu", "📍 Closing menu")
         isMenuExpanded = false
         Companion.isMenuExpanded = false
 
-        params.width = WindowManager.LayoutParams.WRAP_CONTENT // Kích thước của icon thu nhỏ
-        params.height = WindowManager.LayoutParams.WRAP_CONTENT
+        menuOffsetState.value = lastMenuOffset
 
-        // Add back flags for collapsed state - allows touch-through except on the button
-        params.flags =
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+        floatingView?.visibility = View.INVISIBLE
 
-        // QUAN TRỌNG: Đảm bảo params.x và params.y là vị trí hiện tại của icon
-        // trước khi cập nhật layout với WRAP_CONTENT.
-        val currentOffset = menuOffsetState.value
-        params.x = currentOffset.x
-        params.y = currentOffset.y
+        // Gán tất cả giá trị vào params trước
+        params.apply {
+            x = lastMenuOffset.x
+            y = lastMenuOffset.y
+            width = WindowManager.LayoutParams.WRAP_CONTENT
+            height = WindowManager.LayoutParams.WRAP_CONTENT
+            flags = (WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                    or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH)
+        }
 
+        // Update layout chỉ một lần
         windowManager.updateViewLayout(floatingView, params)
+
+        Handler(Looper.getMainLooper()).post {
+            floatingView?.visibility = View.VISIBLE
+        }
     }
+
 
     // Helper extension for dp to px conversion
     private fun dpToPx(dp: Int): Float {

@@ -189,7 +189,7 @@ fun ActionCenterDetail(cardID: String) {
                 )
 
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(4), // 4 cột cố định
+                    columns = GridCells.Fixed(5),
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
@@ -218,13 +218,14 @@ fun ActionCenterDetail(cardID: String) {
                             modifier = Modifier
                                 .aspectRatio(1f) // giữ box vuông đều
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.primary)
-                                .padding(8.dp),
+                                .background(Color.Transparent)
+                                .padding(2.dp)
+                                .border(2.dp, MaterialTheme.colorScheme.primary),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.Transparent,
                                 contentColor = Color.Transparent
                             ),
-                            contentPadding = PaddingValues(1.dp)
+                            contentPadding = PaddingValues(2.dp)
                         ) {
                             Column(
                                 modifier = Modifier
@@ -236,13 +237,13 @@ fun ActionCenterDetail(cardID: String) {
                                 Icon(
                                     imageVector = value.second,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onPrimary,
-                                    modifier = Modifier.size(24.dp)
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(Modifier.height(4.dp))
                                 Text(
                                     text = value.first,
-                                    color = MaterialTheme.colorScheme.onPrimary,
+                                    color = MaterialTheme.colorScheme.primary,
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )

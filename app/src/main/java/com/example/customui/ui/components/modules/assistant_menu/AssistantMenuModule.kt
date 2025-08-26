@@ -2,14 +2,10 @@ package com.example.customui.ui.components.modules.assistant_menu
 
 import androidx.compose.foundation.clickable
 import androidx.compose.material3.Icon
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,7 +37,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -56,12 +51,10 @@ import com.example.customui.services.assistantmenu.AssistantMenuServiceHelper
 fun AssistantMenuModule(
     isExpanded: Boolean,
     menuOffset: IntOffset,
-    onToggleExpand: () -> Unit,
     onToggleClose: () -> Unit,
-    onCloseMenu: () -> Unit,
     menuManager: AssistantMenuServiceHelper,
 ) {
-    Log.d("AssistantMenu", "🔍 Expanded menuOffset: $menuOffset")
+//    Log.d("AssistantMenu", "🔍 Expanded menuOffset: $menuOffset")
     if (isExpanded) {
         Box(
             modifier = Modifier
@@ -113,11 +106,11 @@ fun AssistantMenuModule(
                 // Ràng buộc biên để menu không tràn ra ngoài màn hình
                 val finalX = targetX.coerceIn(
                     0f,
-                    (screenWidthPx - buttonSize - menuWidthPx).coerceAtLeast(0f)
+                    (screenWidthPx - menuWidthPx).coerceAtLeast(0f)
                 )
                 val finalY = targetY.coerceIn(
                     0f,
-                    (screenHeightPx - buttonSize - menuHeightPx).coerceAtLeast(0f)
+                    (screenHeightPx - menuHeightPx).coerceAtLeast(0f)
                 )
 
                 Log.d("AssistantMenu", "finalX: $finalX finalY: $finalY")
@@ -132,11 +125,9 @@ fun AssistantMenuModule(
             Box(
                 modifier = Modifier
                     .offset { smartOffset }
-                    .widthIn(max = screenWidthDp - paddingDp * 2)
-                    .heightIn(max = screenHeightDp - paddingDp * 2)
+                    .widthIn(max = screenWidthDp)
+                    .heightIn(max = screenHeightDp)
                     .wrapContentSize()
-                    .wrapContentSize()
-                    .padding(16.dp)
                     .clip(RoundedCornerShape(16.dp))
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
@@ -174,7 +165,11 @@ fun AssistantMenuModule(
                             },
                             modifier = Modifier
                                 .padding(4.dp)
-                                .background(Color(0xB5222222), CircleShape)
+                                .background(
+                                    if (currentItem !== null && currentItem.isEnabled())
+                                        Color.White
+                                    else Color.DarkGray, CircleShape
+                                )
                         ) {
                             Icon(
                                 imageVector = if (currentItem!!.isEnabled())
@@ -182,7 +177,7 @@ fun AssistantMenuModule(
                                 else
                                     currentItem.getDefaultIcon(),
                                 contentDescription = label,
-                                tint = if (currentItem.isEnabled()) Color.White else Color.Gray,
+                                tint = if (currentItem.isEnabled()) Color.Black else Color.LightGray,
                                 modifier = Modifier.padding(4.dp)
                             )
                         }
@@ -191,6 +186,7 @@ fun AssistantMenuModule(
             }
         }
     } else {
+
         Box(
             modifier = Modifier
                 .size(48.dp)
@@ -213,23 +209,6 @@ fun AssistantMenuModule(
                     .clip(RoundedCornerShape(16.dp)),
             )
         }
-    }
-}
-
-
-@Composable
-fun FunctionalButton(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.clickable { onClick() }
-    ) {
-        Icon(icon, contentDescription = label, modifier = Modifier.size(36.dp))
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = label, style = MaterialTheme.typography.labelSmall)
     }
 }
 
