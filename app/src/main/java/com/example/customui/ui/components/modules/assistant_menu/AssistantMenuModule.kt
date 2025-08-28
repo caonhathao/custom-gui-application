@@ -110,7 +110,7 @@ fun AssistantMenuModule(
                 )
                 val finalY = targetY.coerceIn(
                     0f,
-                    (screenHeightPx - menuHeightPx).coerceAtLeast(0f)
+                    (screenHeightPx - paddingPx - menuHeightPx).coerceAtLeast(0f)
                 )
 
                 Log.d("AssistantMenu", "finalX: $finalX finalY: $finalY")
@@ -168,7 +168,7 @@ fun AssistantMenuModule(
                                 .background(
                                     if (currentItem !== null && currentItem.isEnabled())
                                         Color.White
-                                    else Color.DarkGray, CircleShape
+                                    else Color.DarkGray.copy(alpha = 0.7f), CircleShape
                                 )
                         ) {
                             Icon(

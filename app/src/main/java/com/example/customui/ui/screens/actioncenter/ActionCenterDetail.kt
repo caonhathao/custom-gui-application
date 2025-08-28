@@ -1,15 +1,18 @@
 package com.example.customui.ui.screens.actioncenter
 
 import android.content.Context
+import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -20,6 +23,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,6 +66,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 fun loadActionCenterDetailFromAssets(
     context: Context,
@@ -73,6 +79,7 @@ fun loadActionCenterDetailFromAssets(
     return response.data.find { it.id == targetId }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActionCenterDetail(cardID: String) {
     val context = LocalContext.current
@@ -89,13 +96,13 @@ fun ActionCenterDetail(cardID: String) {
 
     // Khi composable được gọi, bắt đầu load data
     LaunchedEffect(Unit) {
-        delay(2000)
         data = loadActionCenterDetailFromAssets(
             context,
             "actioncenter-detail-fake-data.json",
             targetId = cardID // id cần tìm
         )
         isLoading = false
+        delay(200)
     }
 
     if (isLoading) {
@@ -103,7 +110,7 @@ fun ActionCenterDetail(cardID: String) {
     } else {
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .wrapContentSize()
                 .background(MaterialTheme.colorScheme.background)
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -138,7 +145,7 @@ fun ActionCenterDetail(cardID: String) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
+                    .clip(RoundedCornerShape(8.dp))
                     .border(
                         2.dp, LinearGradientBrush(
                             colors = listOf(
@@ -151,24 +158,22 @@ fun ActionCenterDetail(cardID: String) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                GradientText(
+                Text(
                     text = "Artist: ${data?.ActionCenterDetail?.artist}",
-                    colors = listOf(
-                        Color(0xFF9D6BFF), // tím
-                        Color(0xFF00D1FF), // xanh
-                        Color(0xFFFF57B9)  // hồng
-                    ),
-                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
-                GradientText(
-                    text = "Created at: ${data?.ActionCenterDetail?.createdAt}",
-                    colors = listOf(
-                        Color(0xFF9D6BFF), // tím
-                        Color(0xFF00D1FF), // xanh
-                        Color(0xFFFF57B9)  // hồng
-                    ),
-                    fontSize = 16.sp,
+
+                val dateTimeString = data?.ActionCenterDetail?.createdAt
+
+                val dateTime = OffsetDateTime.parse(dateTimeString)
+                val formattedDate = dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
+                Text(
+                    text = "Created at: ${formattedDate}",
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold
                 )
             }
@@ -189,10 +194,10 @@ fun ActionCenterDetail(cardID: String) {
                 )
 
                 LazyVerticalGrid(
-                    columns = GridCells.Fixed(5),
+                    columns = GridCells.Fixed(4),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(8.dp))
                         .border(
                             2.dp,
                             Brush.linearGradient(
@@ -213,23 +218,16 @@ fun ActionCenterDetail(cardID: String) {
 
                     items(data.size) { index ->
                         val value = data[index]
-                        Button(
-                            onClick = {},
+                        Box(
                             modifier = Modifier
                                 .aspectRatio(1f) // giữ box vuông đều
                                 .clip(RoundedCornerShape(16.dp))
-                                .background(Color.Transparent)
-                                .padding(2.dp)
-                                .border(2.dp, MaterialTheme.colorScheme.primary),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.Transparent
-                            ),
-                            contentPadding = PaddingValues(2.dp)
+                                .background(Color.Transparent),
                         ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
+                                    .clip(RoundedCornerShape(16.dp))
                                     .padding(2.dp),
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
